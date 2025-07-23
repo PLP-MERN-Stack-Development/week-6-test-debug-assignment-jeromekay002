@@ -1,40 +1,24 @@
-# Node modules (both client and server)
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
 node_modules/
 client/node_modules/
 server/node_modules/
 
-# Vite build
-client/dist/
-
-# Vite cache
-client/.vite/
-
 # Build output
-server/dist/
+dist/
+build/
+
+# Optional npm cache directory
+.npm
 
 # Environment variables
 .env
 .env.local
-.env.test
-client/.env
-server/.env
 
-# Logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
-
-# OS
+# System files
 .DS_Store
 Thumbs.db
-
-# Testing
-coverage/
-.vitest/
-client/coverage/
-server/coverage/
-
-# IDE/editor config
-.vscode/
-.idea/
-*.swp
