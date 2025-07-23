@@ -86,3 +86,5 @@ Your work will be automatically submitted when you push to your GitHub Classroom
 - [Supertest Documentation](https://github.com/visionmedia/supertest)
 - [Cypress Documentation](https://docs.cypress.io/)
 - [MongoDB Testing Best Practices](https://www.mongodb.com/blog/post/mongodb-testing-best-practices) 
+
+<!-- jerome to redo -->
