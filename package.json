@@ -1,0 +1,16 @@
+{
+  "name": "week-6-test-debug-assignment-jeromekay002",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:client": "cd client && jest",
+    "test:server": "cd server && cross-env NODE_ENV=test jest",
+    "test:e2e": "cd client && npx cypress open",
+    "test": "npm run test:client && npm run test:server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.13.1"
+}

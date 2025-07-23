@@ -8,6 +8,8 @@ const Post = require('../../src/models/Post');
 const User = require('../../src/models/User');
 const { generateToken } = require('../../src/utils/auth');
 
+jest.setTimeout(60000); // 20 seconds
+
 let mongoServer;
 let token;
 let userId;
@@ -15,9 +17,15 @@ let postId;
 
 // Setup in-memory MongoDB server before all tests
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
+  mongoServer = await MongoMemoryServer.create({
+    binary: {
+      version: '5.0.13',
+      downloadDir: process.env.MONGOMS_DOWNLOAD_DIR || './mongodb-binaries',
+    },
+  });
+
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri);
 
   // Create a test user
   const user = await User.create({
@@ -33,7 +41,7 @@ beforeAll(async () => {
     title: 'Test Post',
     content: 'This is a test post content',
     author: userId,
-    category: mongoose.Types.ObjectId(),
+    category: new mongoose.Types.ObjectId(),
     slug: 'test-post',
   });
   postId = post._id;
@@ -42,8 +50,11 @@ beforeAll(async () => {
 // Clean up after all tests
 afterAll(async () => {
   await mongoose.disconnect();
-  await mongoServer.stop();
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
 });
+
 
 // Clean up database between tests
 afterEach(async () => {
@@ -62,7 +73,7 @@ describe('POST /api/posts', () => {
     const newPost = {
       title: 'New Test Post',
       content: 'This is a new test post content',
-      category: mongoose.Types.ObjectId().toString(),
+      category: new mongoose.Types.ObjectId().toString(),
     };
 
     const res = await request(app)
@@ -81,7 +92,7 @@ describe('POST /api/posts', () => {
     const newPost = {
       title: 'Unauthorized Post',
       content: 'This should not be created',
-      category: mongoose.Types.ObjectId().toString(),
+      category: new mongoose.Types.ObjectId().toString(),
     };
 
     const res = await request(app)
@@ -95,7 +106,7 @@ describe('POST /api/posts', () => {
     const invalidPost = {
       // Missing title
       content: 'This post is missing a title',
-      category: mongoose.Types.ObjectId().toString(),
+      category: new mongoose.Types.ObjectId().toString(),
     };
 
     const res = await request(app)
@@ -118,8 +129,8 @@ describe('GET /api/posts', () => {
   });
 
   it('should filter posts by category', async () => {
-    const categoryId = mongoose.Types.ObjectId().toString();
-    
+    const categoryId = new mongoose.Types.ObjectId().toString();
+
     // Create a post with specific category
     await Post.create({
       title: 'Filtered Post',
@@ -146,7 +157,7 @@ describe('GET /api/posts', () => {
         title: `Pagination Post ${i}`,
         content: `Content for pagination test ${i}`,
         author: userId,
-        category: mongoose.Types.ObjectId(),
+        category: new mongoose.Types.ObjectId(),
         slug: `pagination-post-${i}`,
       });
     }
@@ -154,7 +165,7 @@ describe('GET /api/posts', () => {
 
     const page1 = await request(app)
       .get('/api/posts?page=1&limit=10');
-    
+
     const page2 = await request(app)
       .get('/api/posts?page=2&limit=10');
 
@@ -177,7 +188,7 @@ describe('GET /api/posts/:id', () => {
   });
 
   it('should return 404 for non-existent post', async () => {
-    const nonExistentId = mongoose.Types.ObjectId();
+    const nonExistentId = new mongoose.Types.ObjectId();
     const res = await request(app)
       .get(`/api/posts/${nonExistentId}`);
 
@@ -243,7 +254,7 @@ describe('DELETE /api/posts/:id', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    
+
     // Verify post is deleted
     const deletedPost = await Post.findById(postId);
     expect(deletedPost).toBeNull();
